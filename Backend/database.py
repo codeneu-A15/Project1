@@ -1,7 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase , sessionmaker
+import os
+from dotenv import load_dotenv
 
-Database_url_link = "postgresql://postgres:neeraj55435@localhost/Quiz"
+load_dotenv('db.env')
+
+Database_url_link = os.getenv("Database_url_link")
 
 engine = create_engine(Database_url_link,connect_args= {'check same Thread' : False})
 
