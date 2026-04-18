@@ -1,0 +1,10 @@
+
+
+.venv/
+venv/
+ENV/
+env/
+
+.env
+db.env
+*.env
