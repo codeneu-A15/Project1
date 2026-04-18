@@ -17,7 +17,7 @@ class Seller(Base):
     __tablename__ = 'Seller'
     id = Column(Integer,primary_key=True,index=True)
     email = Column(String , unique=True , nullable= False)
-    user_name = Column(String , unique=True , nullable=False)
+    username = Column(String , unique=True , nullable=False)
     first_name = Column(String , nullable= False)
     last_name = Column (String , nullable= False)
     hashed_password = Column(String)
