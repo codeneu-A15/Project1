@@ -10,3 +10,4 @@ db.env
 *.env
 
 .idea/
+alembic.ini
