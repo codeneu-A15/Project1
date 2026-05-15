@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException
-from Backend.models import UserRole,User
+from Backend.models import UserRole,User,Seller
 from jose import jwt,JWTError
 import os
 from dotenv import load_dotenv
@@ -58,10 +58,11 @@ def get_current_user(token : Annotated[str , Depends(oauth_bearer)] , db : db_de
         raise HTTPException(status_code=401, detail='Could not validate user.')
 
 
-def seller_verify(user : Annotated[User , Depends(get_current_user)]):
+def seller_verify(user : Annotated[User , Depends(get_current_user)] , db : db_dependency):
     if user.user_role != UserRole.SELLER:
         raise HTTPException(status_code=403 , detail='Not authorised for this action')
-    return user
+    seller = db.query(Seller).filter(Seller.user_id == user.user_id).first()
+    return seller
 
 def admin_verify(user : Annotated[User , Depends(get_current_user)]):
     if user.user_role != UserRole.ADMIN:

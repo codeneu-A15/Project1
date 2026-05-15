@@ -46,6 +46,7 @@ class Product(Base):
     __tablename__ = 'product'
 
     product_id = Column(Integer , primary_key=True, index=True)
+    product_image = Column(String , nullable= True)
     product_name = Column(String ,nullable= False)
     price = Column(Numeric(10,2) , nullable=False)
     stock = Column(Integer)
