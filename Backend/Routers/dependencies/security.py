@@ -64,10 +64,10 @@ def seller_verify(user : Annotated[User , Depends(get_current_user)] , db : db_d
     seller = db.query(Seller).filter(Seller.user_id == user.user_id).first()
     return seller
 
-def admin_verify(user : Annotated[User , Depends(get_current_user)]):
-    if user.user_role != UserRole.ADMIN:
+def admin_verify(admin : Annotated[User , Depends(get_current_user)]):
+    if admin.user_role != UserRole.ADMIN:
         raise HTTPException(status_code=403 , detail='Not authorised for this action')
-    return user
+    return admin
 
 
 def authenticate_user(username : str , password : str , db : db_dependency):

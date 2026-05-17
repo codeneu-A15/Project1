@@ -1,10 +1,12 @@
+import datetime
 from starlette import status
 from fastapi import APIRouter , HTTPException
 from pydantic import BaseModel , Field
 from decimal import Decimal
 from Backend.Routers.dependencies.db_dependencies import db_dependency
 from Backend.Routers.dependencies.user_dependencies import seller_dependency
-from Backend.models import Product
+from Backend.models import Product, OrderItems ,Order
+from sqlalchemy import func , extract
 
 router = APIRouter(
     prefix='/seller',
@@ -24,6 +26,13 @@ class ProductUpdateRequest(BaseModel):
     stock : int | None = Field(default=None ,gt=0)
     category : str | None = Field(default=None , min_length=3)
     product_image : str | None
+
+class SellerSaleQuery(BaseModel):
+    year : int = Field(gt=2000,lt= datetime.datetime.now().year + 1)
+
+
+month_dict = { 1 : 'January' , 2 : 'February' , 3 : 'March' , 4 : 'April' , 5 : 'May' , 6 : 'June' ,
+               7 : 'July' , 8 : 'August' , 9 : 'September' , 10 : 'October' , 11 : 'November' , 12 : 'December'}
 
 
 @router.get('/all_product' , status_code=status.HTTP_200_OK)
@@ -69,3 +78,24 @@ async def delete_product(seller : seller_dependency , product_id: int ,  db : db
     db.delete(product)
     db.commit()
     return {'message' : 'Successfully deleted product'}
+
+
+@router.post('/analytics/sales_per_month' , status_code=status.HTTP_201_CREATED)
+async def sales_per_month(seller : seller_dependency , db : db_dependency , year :SellerSaleQuery):
+
+    sales_data = (db.query(extract('month', Order.created_at) ,
+    func.sum(OrderItems.price_at_purchase * OrderItems.quantity)).join(Order)
+                     .filter(OrderItems.seller_id == seller.id,
+                    extract('year', Order.created_at)==year.year)
+                     .group_by(extract('month',Order.created_at)).all())
+    sales_data = dict(sales_data)
+
+    final_sales_data = [
+        {
+            "month": month_dict[month_num],
+            "sales": float(sales_data.get(month_num, 0))
+        }
+        for month_num in range(1, 13)
+    ]
+
+    return final_sales_data
