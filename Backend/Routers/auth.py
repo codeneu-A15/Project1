@@ -3,12 +3,13 @@ from sqlalchemy.exc import IntegrityError
 from starlette import status
 from fastapi import APIRouter , HTTPException
 from pydantic import BaseModel
-from Backend.models import Customer, Seller, UserRole , User
+from Backend.models import Customer, Seller, UserRole , User ,BlackListedToken
 from Backend.Routers.dependencies.db_dependencies import db_dependency
 from fastapi.security import OAuth2PasswordRequestForm
 from typing import Annotated
 from datetime import timedelta
-from Backend.Routers.dependencies.security import create_access_token, bcrypt_context, authenticate_user
+from Backend.Routers.dependencies.security import create_access_token, bcrypt_context, authenticate_user ,\
+                                                    oauth_bearer
 
 router = APIRouter(
     prefix='/auth',
@@ -71,7 +72,7 @@ async def customer_registration(new_user : CreateNewUser ,
 
 
 @router.post("/SellerResgistration", status_code=status.HTTP_201_CREATED)
-async def create_new_seller(new_user: CreateNewUser,
+async def seller_registration(new_user: CreateNewUser,
                          new_seller: CreateSellerRequest,
                          db: db_dependency):
     try:
@@ -117,3 +118,14 @@ async def login_access_token(form_data : Annotated[OAuth2PasswordRequestForm , D
     token = create_access_token(user.user_id , user.username , user.user_role , timedelta(minutes=30))
 
     return {'access_token' : token , 'token_type' : 'bearer'}
+
+
+@router.post("/logout")
+async def logout( db : db_dependency ,
+                     token : Annotated[str , oauth_bearer]):
+
+    token_to_add = BlackListedToken(encoded_string= token)
+    db.add(token_to_add)
+    db.commit()
+
+    return {'message' : 'logout successful'}

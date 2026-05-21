@@ -4,7 +4,6 @@ from sqlalchemy import Column, Integer, Boolean, String, ForeignKey, Text, Numer
 from  sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 
-
 class UserRole(enum.Enum):
     CUSTOMER = 'customer'
     ADMIN = 'admin'
@@ -72,11 +71,13 @@ class Product(Base):
     product_image = Column(String , nullable= True)
     product_name = Column(String ,nullable= False)
     price = Column(Numeric(10,2) , nullable=False)
+    brand = Column(String)
     stock = Column(Integer , nullable=False)
     description = Column(String , nullable=False)
     seller_id = Column(Integer , ForeignKey('seller.id' , ondelete="CASCADE") )
     category = Column(String)
     seller = relationship("Seller", back_populates="products" , uselist=False)
+
 
 
 class Order(Base):
@@ -99,3 +100,10 @@ class OrderItems(Base):
     quantity = Column(Integer , nullable=False)
     price_at_purchase = Column(Numeric(10 , 2) , nullable=False)
     delivery_status = Column(Enum(DeliveryStatus) , default= DeliveryStatus.PENDING)
+
+class BlackListedToken(Base):
+    __tablename__ = 'expToken'
+
+    id = Column(Integer , primary_key=True , index=True)
+    encoded_string = Column(Text , unique=True , nullable= False , index=True)
+    blacklisted_at = Column(DateTime , default=lambda:datetime.now(timezone.utc))

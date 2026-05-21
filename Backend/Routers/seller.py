@@ -17,6 +17,7 @@ class ProductCreateRequest(BaseModel):
     product_name : str = Field(min_length = 3)
     price : Decimal = Field(gt=0,decimal_places=2,max_digits=12)
     stock : int = Field(gt=0)
+    brand : str = Field(min_length=3)
     category : str = Field(min_length=3)
     product_image : str | None
 

@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException
-from Backend.models import UserRole,User,Seller
+from Backend.models import UserRole,User,Seller,BlackListedToken
 from jose import jwt,JWTError
 import os
 from dotenv import load_dotenv
@@ -41,6 +41,12 @@ def create_access_token(user_id : str ,username : str , user_role : UserRole ,ex
     return jwt.encode(encode,SECRET_KEY,algorithm=ALGORITHMS)
 
 def get_current_user(token : Annotated[str , Depends(oauth_bearer)] , db : db_dependency):
+
+    verification_token = db.query(BlackListedToken).filter(BlackListedToken.encoded_string == token).first()
+
+    if verification_token is not None:
+        raise HTTPException(status_code=401 , detail='Not Authorised')
+
     try:
         payload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHMS])
         username : str = payload.get('user')

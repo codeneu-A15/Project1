@@ -2,4 +2,3 @@ passlib
 Bcrypt==4.0.1
 alembic
 python-multipart
-"Python=jose[cryptography]"
